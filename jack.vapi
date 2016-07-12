@@ -170,6 +170,16 @@ namespace Jack {
 		SaveTemplate = 3
 	}
 
+	[CCode(cname="JackPropertyChangeCallback")]
+	public delegate void PropertyChangeCallback (Uuid subject, string key, PropertyChange change, void* arg);
+
+	[CCode(cname="jack_property_change_t", cprefix="Property")]
+	public enum PropertyChange {
+		Created,
+		Changed,
+		Deleted
+	}
+
 	[Flags]
 	[CCode(cname="JackSessionFlags", cprefix="JackSession")]
 	public enum SessionFlags {
@@ -209,6 +219,30 @@ namespace Jack {
 		public int event_write (void* port_buffer, NFrames time, Data* data, size_t data_size);
 		public uint32 get_lost_event_count (void* port_buffer);
 	}
+
+	[CCode(cname="jack_property_t")]
+	public struct Property {
+		public string key;
+		public string data;
+		public string type;
+	}
+
+	[CCode(cname="jack_description_t")]
+	public struct Description {
+		public Uuid subject;
+		public uint32 property_cnt;
+		public Property* properties;
+		public uint32 property_size;
+	}
+
+	[CCode(cname="jack_get_property")]
+	public int jack_get_property (Uuid subject, string key, string* value, string* type);
+	[CCode(cname="jack_free_description")]
+	public void jack_free_description (Description* desc, int free_description_itself);
+	[CCode(cname="jack_get_all_properties")]
+	public int jack_get_all_properties (Description** descs);
+	[CCode(cname="jack_get_properties")]
+	public int jack_get_properties (Uuid subject, Description* desc);
 
 	[Compact]
 	[CCode(cname="jack_client_t", free_function="jack_client_close")]
@@ -326,6 +360,16 @@ namespace Jack {
 		public int session_reply (SessionEvent* event);
 		[CCode(cname="jack_client_get_uuid")]
 		public string client_get_uuid ();
+		[CCode(cname="jack_set_property")]
+		public int set_property (Uuid subject, string key, string value, string type);
+		[CCode(cname="jack_remove_property")]
+		public int remove_property (Uuid subject, string key);
+		[CCode(cname="jack_remove_properties")]
+		public int remove_properties (Uuid subject);
+		[CCode(cname="jack_remove_all_properties")]
+		public int remove_all_properties ();
+		[CCode(cname="jack_set_property_change_callback")]
+		public int set_property_change_callback (PropertyChangeCallback callback, void* arg);
 	}
 
 	[Compact]
